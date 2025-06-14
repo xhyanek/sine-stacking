@@ -291,7 +291,9 @@ const sketch = (p) => {
 
     gfx.background(data.backgroundColor);
 
-    iterations = gfx.int(gfx.height + data.mainWaveAmplitudeMultiplier * data.secondaryWaveAmplitudeMultiplier * 2);
+    iterations = (data.upsampleExport) 
+      ? gfx.int(h + data.mainWaveAmplitudeMultiplier * data.secondaryWaveAmplitudeMultiplier * 2)
+      : gfx.int(gfx.height + data.mainWaveAmplitudeMultiplier * data.secondaryWaveAmplitudeMultiplier * 2);
     offsets = new Array(iterations + 1);
     heightCorrection = -data.mainWaveAmplitudeMultiplier * data.secondaryWaveAmplitudeMultiplier;
 
