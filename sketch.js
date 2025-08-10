@@ -1,5 +1,20 @@
-const h = 270;
-const w = 480;
+// todo gallery - load random predefined configuration
+// todo fix preview rendering
+// todo load random parameters
+// todo contact
+// todo guide style
+
+let h = 270;
+let w = 480;
+
+let previewH = 54
+let previewW = 96
+
+const landscapeH = 270;
+const landscapeW = 480;
+
+const portraitH = 270;
+const portraitW = 480;
 
 let iterations;
 let heightCorrection;
@@ -27,17 +42,40 @@ let secondarySineSettings;
 
 const data = {};
 
+tabContents = {};
+
+let canvas;
+
+let htmlLines;
+
+let buttons = {};
+
+let exampleCount = 14;
+let exampleConfigs = {};
+
 const sketch = (p) => {
+  p.preload = () => {
+    htmlLines = p.loadStrings('guide.html');
+
+    for (let i = 1; i <= exampleCount; i++) {
+      let configFile = i + '.json';
+      exampleConfigs[configFile] = {};
+      exampleConfigs[configFile].data = p.loadJSON(`examples/${configFile}`);
+    }
+  }
+
   p.setup = (gfx = p) => {
     gfx.frameRate(24);
     gfx.colorMode(gfx.HSB);
-    let canvas = gfx.createCanvas(w, h);
+    canvas = gfx.createCanvas(w, h);
 
     sliders = {};
 
     // UI GROUPS ///////////////////////////////////////////////////////////////////////
+
+    // wave settings
     let FPSDisplay = gfx.createP();
-    setInterval(() => { FPSDisplay.html("FPS: " + gfx.frameRate()) }, 1000);
+    setInterval(() => { FPSDisplay.html("FPS: " + gfx.frameRate() + "; loops after: " + getLoopLength() + (getLoopLength() == 1 ? " frame" : " frames")) }, 1000);
 
     enableAmplitudeAnimationCheckbox = gfx.createCheckbox("Animate Amplitude", false);
     enableSecondaryAnimationCheckbox = gfx.createCheckbox("Animate Secondary Amplitude", false);
@@ -82,7 +120,7 @@ const sketch = (p) => {
     enableCirclesCheckbox = gfx.createCheckbox("Render Circles", false);
     let renderSettings = createSection("Render Settings", [enableLinesCheckbox, renderCurveFillCheckbox, enableCirclesCheckbox, radioDiv]);
 
-    backgroundColorPicker = gfx.createColorPicker(gfx.color('black'));
+    backgroundColorPicker = gfx.createColorPicker(gfx.color('black'))//.style("background", "#222");
     waveColorPicker = gfx.createColorPicker(gfx.color('green'));
     dotColorPicker = gfx.createColorPicker(gfx.color('orange'));
     curveFillColorPicker = gfx.createColorPicker(gfx.color('pink'));
@@ -97,12 +135,12 @@ const sketch = (p) => {
     // export
     upsampleExportCheckbox = gfx.createCheckbox("Upscale when exporting", true);
 
-    let buttonGIF = gfx.createButton('Download GIF loop');
+    let buttonGIF = gfx.createButton('Download GIF loop').class('button');
     buttonGIF.mousePressed(() => gfx.saveGif('mySketch', getLoopLength(), { units: 'frames', notificationDuration: 3 }));
     loopFrameCountText = gfx.createP();
     let gifSection = createSubSection('GIF', [loopFrameCountText, buttonGIF]);
 
-    let buttonSVG = gfx.createButton('Download SVG');
+    let buttonSVG = gfx.createButton('Download SVG').class('button');
     buttonSVG.mousePressed(() => {
       const svgGfx = p.createGraphics(p.width, p.height, p.SVG);
       p.draw(svgGfx);
@@ -110,23 +148,23 @@ const sketch = (p) => {
     });
     let svgSection = createSubSection('SVG', [buttonSVG]);
 
-    let buttonPNGqHD = gfx.createButton('Download qHD PNG');
+    let buttonPNGqHD = gfx.createButton('Download qHD PNG').class('button');
     buttonPNGqHD.mousePressed(() => savePNG(2, false));
-    let buttonPNGFHD = gfx.createButton('Download Full HD PNG');
+    let buttonPNGFHD = gfx.createButton('Download Full HD PNG').class('button');
     buttonPNGFHD.mousePressed(() => savePNG(4, false));
-    let buttonPNG4K = gfx.createButton('Download 4K PNG');
+    let buttonPNG4K = gfx.createButton('Download 4K PNG').class('button');
     buttonPNG4K.mousePressed(() => savePNG(8, false));
     let pngSection = createSubSection('PNG', [buttonPNGqHD, buttonPNGFHD, buttonPNG4K]);
 
-    let buttonPNGqHDSeq = gfx.createButton('Download qHD PNG sequence');
+    let buttonPNGqHDSeq = gfx.createButton('Download qHD PNG sequence').class('button');
     buttonPNGqHDSeq.mousePressed(() => savePNG(2, true));
-    let buttonPNGFHDSeq = gfx.createButton('Download Full HD PNG sequence');
+    let buttonPNGFHDSeq = gfx.createButton('Download Full HD PNG sequence').class('button');
     buttonPNGFHDSeq.mousePressed(() => savePNG(4, true));
-    let buttonPNG4KSeq = gfx.createButton('Download 4K PNG sequence');
+    let buttonPNG4KSeq = gfx.createButton('Download 4K PNG sequence').class('button');
     buttonPNG4KSeq.mousePressed(() => savePNG(8, true));
     let pngSeqSection = createSubSection('PNG Sequence', [buttonPNGqHDSeq, buttonPNGFHDSeq, buttonPNG4KSeq]);
 
-    let buttonJSON = gfx.createButton('Download JSON');
+    let buttonJSON = gfx.createButton('Download JSON').class('button');
     buttonJSON.mousePressed(() => gfx.saveJSON(data, 'sine-stacker-data.json'));
     let jsonExportSection = createSubSection('JSON', [buttonJSON]);
 
@@ -140,17 +178,17 @@ const sketch = (p) => {
     ]);
 
     let fileInput = gfx.createFileInput(loadParameters);
-    let importSection = createSection("Import", [fileInput]);
+    let importSection = createSection("Import JSON", [fileInput]);
 
     // UI GROUPS ^^ /////////////////////////////////////////////////////////////////////
 
     let canvasSection = createSection("", [
       canvas,
       FPSDisplay,
-    ], false);
+    ], false).style("position", "sticky").style("margin-top", "0px").style("top", "0px").style("grid-area", "canvas");
 
-    let settingsSection = createFlexSection("", [
-      canvasSection,
+    /* let settingsSection = createFlexSection("", [
+      //canvasSection,
       waveSettings,
       horizontalWaveOffsets,
       shapeStyle,
@@ -158,17 +196,132 @@ const sketch = (p) => {
       colorSettings,
       exportSection,
       importSection,
-    ], false, false, "#191919");
+    ], false, false, "#191919"); */
 
-    gfx.createButton('About').mousePressed(() => alert('Author: Vojtěch Hyánek\nCreated at FI MU as a part of the PV097 course\nSemester "Spring 2025"'))
+    let shapeSettings = [
+      waveSettings,
+      horizontalWaveOffsets,
+      shapeStyle,
+      renderSettings,
+      colorSettings,
+    ];
+
+    // Tabs
+    buttonContainer = gfx.createDiv().style("position", "sticky").style("top", "4px").style("margin-left", "4px");//.class("tab-container");
+    let tabs = ['Visual', 'Import', 'Export', 'Guide', 'Examples', 'About'];
+    //let activeTab = 'Visual';
+    let activeTab = 'Examples'; // todo
+
+    tabs.forEach(tabName => {
+      let btn = gfx.createButton(tabName).class("button").parent(buttonContainer);
+      btn.mousePressed(() => showTab(tabName));
+      buttons[tabName] = btn;
+    });
+
+    // ensure the correct tab is highlighted
+    showTab('Visual');
+
+    let tabContainer = gfx.createDiv().style("grid-area", "tab-container").style("max-width", "500px")//.style("width", "100%");
+
+    buttonContainer.parent(tabContainer);
+    tabs.forEach(tabName => {
+      let div = gfx.createDiv().class('tab-content').parent(tabContainer);
+      div.style('display', tabName === activeTab ? 'block' : 'none');
+      tabContents[tabName] = div;
+    });
+
+    shapeSettings.forEach(el => {
+      if (el.parent) el.parent(tabContents['Visual']);
+    });
+
+    exportSection.parent(tabContents['Export']);
+    importSection.parent(tabContents['Import']);
+
+    let manualDiv = gfx.createDiv();
+    manualDiv.html(htmlLines.join('\n'));
+    let manualSection = createSection("", [manualDiv], true, "#222", false);
+    manualSection.parent(tabContents['Guide']);
+    gfx.createP(`Author: Vojtěch Hyánek<br />
+                Created at FI MU as a part of the PV097 course<br />
+                Semester "Spring 2025"`
+    ).parent(tabContents['About']);
+
+    let exampleArray = [];
+    for (let i = 1; i <= exampleCount; i++) {
+      exampleArray.push(createExample(i + '.json'));
+    }
+    let examplesSection = createSection("", exampleArray, true, "#222", false).style("display", "flex").style("flex-wrap", "wrap").style("justify-content", "space-around");
+    examplesSection.parent(tabContents['Examples']);
+
+    let mainDiv;
+    if (gfx.windowWidth > 1000) {
+      mainDiv = gfx.createDiv().class('main-grid-container');
+      canvasSection.style("justify-self", "end");
+      canvasSection.parent(mainDiv);
+      tabContainer.parent(mainDiv);
+      console.log("wide")
+    } else {
+      console.log("narrow")
+      mainDiv = gfx.createDiv().style("display", "flex").style("flex-direction", "column").style("flex-wrap", "wrap").style("justify-content", "center");
+      canvasSection.parent(mainDiv);
+      buttonContainer.parent(canvasSection);
+      tabContainer.parent(mainDiv);
+    }
+    //let mainDiv = gfx.createDiv().style("position", "relative");
   };
 
-  function createSection(title, elements, border = true, background = '#222') {
-    const section = p.createDiv().style('margin', '9px 4px').style('padding', '10px').style('width', 'fit-content').style('height', 'fit-content');
+  function showTab(tabName) {
+    window.scrollTo(0, 0);
+    activeTab = tabName;
+    for (let key in tabContents) {
+      tabContents[key].style('display', key === tabName ? 'block' : 'none');
+    }
+    for (let key in tabContents) {
+      buttons[key].class(key === activeTab ? 'button button-selected' : 'button button-unselected');
+    }
+  }
+
+  function createExample(configFile) {
+    let exampleDiv = p.createDiv().style("display", "flex").style("margin", "10px").style("align-items", "center").style("width", "fit-content");
+    //return exampleDiv
+
+    loadParameters(exampleConfigs[configFile]);
+
+    new p5((preview) => {
+      preview.setup = () => {
+        preview.noLoop();
+        preview.createCanvas(previewW, previewH).parent(exampleDiv);
+      };
+      preview.draw = () => {
+        let previewGraphics = preview.createGraphics(previewW, previewH);
+        p.draw(previewGraphics, false, true);
+        preview.image(previewGraphics, 0, 0);
+      };
+    }, exampleDiv.elt);
+
+    p.createButton('Load')
+      .class("button")
+      .style("margin-left", "10px")
+      .parent(exampleDiv)
+      .mousePressed(() => {
+        loadParameters(exampleConfigs[configFile]);
+      });
+
+    return exampleDiv;
+  }
+
+  function createPreview() {
+    let exampleCanvas = p.createGraphics(previewW, previewH);
+    //p.draw(exampleCanvas);
+    return exampleCanvas;
+  }
+
+  function createSection(title, elements, border = true, background = '#222', includeTitle = true) {
+    const section = p.createDiv().style('margin', '9px 4px').style('padding', '10px')/* .style('width', 'fit-content') */.style('height', 'fit-content');
     if (border) section.style('border', '1px solid #666');
     section.style('background', background).style('color', '#ddd').style('border-radius', '8px');
 
-    p.createElement('h3', title).parent(section).style('margin-bottom', '10px').style('margin-top', '0px').style('font-size', '16px');
+    if (includeTitle) p.createElement('h3', title).parent(section).style('margin-bottom', '10px').style('margin-top', '0px').style('font-size', '16px');
 
     elements.forEach(el => {
       if (el.parent) el.parent(section);
@@ -191,7 +344,7 @@ const sketch = (p) => {
   }
 
   function createSubSection(title, elements) {
-    const section = p.createDiv().style('margin', '15px 0').style('padding', '10px').style('border', '1px solid #666');
+    const section = p.createDiv().style('margin', '15px 0').style('padding', '10px').style('border', '1px solid #666').style("display", "flex").style("flex-direction", "column");
     section.style('background', '#333').style('color', '#ddd').style('border-radius', '8px');
 
     p.createElement('h3', title).parent(section).style('margin-bottom', '10px').style('margin-top', '0px').style('font-size', '16px');
@@ -246,7 +399,7 @@ const sketch = (p) => {
     ]);
   }
 
-  p.draw = (gfx = p, renderingLoop = false) => {
+  p.draw = (gfx = p, renderingLoop = false, renderingPreview = false) => {
     // set this to correctly render images (PNG, SVG)
     gfx.colorMode(gfx.HSB);
 
@@ -285,13 +438,13 @@ const sketch = (p) => {
     // for rendering images of different sizes
     if (!renderingLoop) {
       if (data.upsampleExport) {
-        gfx.scale(gfx.width / w, gfx.height / h);
+        gfx.scale(gfx.width / w, gfx.height / h); // todo preview
       }
     }
 
     gfx.background(data.backgroundColor);
 
-    iterations = (data.upsampleExport) 
+    iterations = (data.upsampleExport)
       ? gfx.int(h + data.mainWaveAmplitudeMultiplier * data.secondaryWaveAmplitudeMultiplier * 2)
       : gfx.int(gfx.height + data.mainWaveAmplitudeMultiplier * data.secondaryWaveAmplitudeMultiplier * 2);
     offsets = new Array(iterations + 1);
@@ -299,7 +452,7 @@ const sketch = (p) => {
 
     loopFrameCountText.html("GIF loop frame count (least common multiple of Offset Speed and Amplitude Speed): <b>" + getLoopLength() + "</b>")
 
-    drawWaves(gfx, data, offsets, iterations, heightCorrection);
+    drawWaves(gfx, data, offsets, iterations, heightCorrection, renderingPreview);
 
     if (data.enableOffsets) {
       data.offsetCounter++;
@@ -324,11 +477,16 @@ const sketch = (p) => {
   };
 
   function loadParameters(file) {
+    /* if (!file.data) {
+      file.data = file;
+    } */
+    console.log("file: ", file);
     Object.assign(data, file.data);
     Object.values(sliders).forEach(s => {
       s.changeSlider(data[s.key])
     });
 
+    console.log("data: ", file.data)
     backgroundColorPicker.value(colorToCss(file.data.backgroundColor));
     waveColorPicker.value(colorToCss(file.data.waveColor));
     dotColorPicker.value(colorToCss(file.data.dotColor));
@@ -379,7 +537,7 @@ const sketch = (p) => {
   }
 };
 
-function drawWaves(p, data, offsets, iterations, heightCorrection) {
+function drawWaves(p, data, offsets, iterations, heightCorrection, renderingPreview = false) {
   p.curveTightness(data.curveTightness);
   for (let i = 0; i < offsets.length; i++) {
     let speedNorm = p.sin((data.offsetCounter * p.TWO_PI) / data.offsetAmplitudeSpeed % p.TWO_PI) * data.offsetAmplitudeMultiplier;
@@ -407,7 +565,7 @@ function drawWaves(p, data, offsets, iterations, heightCorrection) {
     p.beginShape();
     // 2 * sharpness because curve doesn't render first and last point
     let start = data.evenSampling ? -data.lineSharpness : modulo(offsets[y], data.lineSharpness) - 2 * data.lineSharpness;
-    for (let x = start; x <= p.width + rightmost + 2 * data.lineSharpness; x += data.lineSharpness) {
+    for (let x = start; x <= p.width + rightmost + 2 * data.lineSharpness * (renderingPreview ? (previewW * 2.5) / data.lineSharpness : 1); x += data.lineSharpness) {
       let vertexX = x;
       let mainWave = sampleSineWave(offsets[y], data.mainWaveAmplitudeSpeed, data.mainWaveAmplitudeMultiplier, data.mainWaveCounter, data.mainWaveFrequency, x, y, heightCorrection);
       let vertexY = !data.useSecondaryWave ? mainWave

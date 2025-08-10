@@ -1,0 +1,189 @@
+{
+  "secondaryWaveAmplitudeMultiplier": 13.7,
+  "secondaryWaveAmplitudeSpeed": 150,
+  "secondaryWaveFrequency": 0.147333333333333,
+  "secondaryWaveProgress": 0.17333333333333334,
+  "spacing": 21,
+  "amplitudeDelay": 0,
+  "lineSharpness": 35,
+  "mainWaveAmplitudeMultiplier": 5.7,
+  "mainWaveAmplitudeSpeed": 90,
+  "mainWaveFrequency": 0.086,
+  "mainWaveProgress": 0.5222222222222223,
+  "offsetOffset": 51.6,
+  "offsetAmplitudeMultiplier": 41.7,
+  "offsetAmplitudeSpeed": 450,
+  "offsetFrequency": 0.0793333333333333,
+  "offsetProgress": 0.2733333333333333,
+  "lineThickness": 1.5,
+  "curveTightness": 0,
+  "circleRadius": 31.5,
+  "alphaChannel": 0.742,
+  "hueShift": 0,
+  "backgroundColor": {
+    "mode": "hsb",
+    "maxes": {
+      "rgb": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "hsb": [
+        360,
+        100,
+        100,
+        1
+      ],
+      "hsl": [
+        360,
+        100,
+        100,
+        1
+      ]
+    },
+    "_array": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "levels": [
+      0,
+      0,
+      0,
+      255
+    ],
+    "hsla": null,
+    "hsba": null
+  },
+  "waveColor": {
+    "mode": "hsb",
+    "maxes": {
+      "rgb": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "hsb": [
+        360,
+        100,
+        100,
+        1
+      ],
+      "hsl": [
+        360,
+        100,
+        100,
+        1
+      ]
+    },
+    "_array": [
+      0,
+      0.5019607843137255,
+      0,
+      0.742
+    ],
+    "levels": [
+      0,
+      128,
+      0,
+      189
+    ],
+    "hsla": null,
+    "hsba": [
+      0.3333333333333333,
+      1,
+      0.5019607843137255,
+      0.742
+    ]
+  },
+  "dotColor": {
+    "mode": "hsb",
+    "maxes": {
+      "rgb": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "hsb": [
+        360,
+        100,
+        100,
+        1
+      ],
+      "hsl": [
+        360,
+        100,
+        100,
+        1
+      ]
+    },
+    "_array": [
+      1,
+      0.6470588235294118,
+      0,
+      0.742
+    ],
+    "levels": [
+      255,
+      165,
+      0,
+      189
+    ],
+    "hsla": null,
+    "hsba": null
+  },
+  "curveFillColor": {
+    "mode": "hsb",
+    "maxes": {
+      "rgb": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "hsb": [
+        360,
+        100,
+        100,
+        1
+      ],
+      "hsl": [
+        360,
+        100,
+        100,
+        1
+      ]
+    },
+    "_array": [
+      1,
+      0.7529411764705882,
+      0.796078431372549,
+      0.742
+    ],
+    "levels": [
+      255,
+      192,
+      203,
+      189
+    ],
+    "hsla": null,
+    "hsba": null
+  },
+  "enableOffsets": true,
+  "enableLines": false,
+  "enableCircles": true,
+  "enableAmplitudeAnimation": true,
+  "enableSecondaryAnimation": true,
+  "evenSampling": false,
+  "renderCurveFill": false,
+  "lineRenderMode": "line",
+  "upsampleExport": true,
+  "useSecondaryWave": true,
+  "offsetCounter": 8224,
+  "mainWaveCounter": 8418,
+  "secondaryWaveCounter": 12177
+}
