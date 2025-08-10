@@ -210,7 +210,7 @@ const sketch = (p) => {
     buttonContainer = gfx.createDiv().style("position", "sticky").style("top", "4px").style("margin-left", "4px");//.class("tab-container");
     let tabs = ['Visual', 'Import', 'Export', 'Guide', 'Examples', 'About'];
     //let activeTab = 'Visual';
-    let activeTab = 'Examples'; // todo
+    let activeTab = 'Visual'; // todo
 
     tabs.forEach(tabName => {
       let btn = gfx.createButton(tabName).class("button").parent(buttonContainer);
@@ -608,3 +608,4 @@ function drawWaves(p, data, offsets, iterations, heightCorrection, renderingPrev
 }
 
 new p5(sketch);
+
