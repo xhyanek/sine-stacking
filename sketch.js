@@ -270,6 +270,19 @@ const sketch = (p) => {
     //let mainDiv = gfx.createDiv().style("position", "relative");
   };
 
+  p.keyTyped = () => {
+    // toggle fullscreen
+    if (p.key === 'f') {
+      const canvas = p.canvas;
+
+      if (!document.fullscreenElement) {
+        canvas.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   function showTab(tabName) {
     window.scrollTo(0, 0);
     activeTab = tabName;
